@@ -51,6 +51,23 @@ npm start
 
 O servidor HTTP do backend também entrega os arquivos estáticos de `dist/` quando eles existem. Em produção, o ideal é publicar esse processo atrás de um domínio fixo.
 
+## Deploy em servidor com PostgreSQL
+
+Este projeto inclui um fluxo de deploy automático em [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) e um script de bootstrap em [`deploy/server-deploy.sh`](./deploy/server-deploy.sh).
+
+Para usar a pipeline no GitHub Actions, configure estes secrets:
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_PATH`
+- `DEPLOY_PORT` opcional, padrão `22`
+- `DEPLOY_SSH_KEY`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+
+No servidor, a aplicação roda com `systemd`, escutando na porta `80`, e usa PostgreSQL como armazenamento persistente da API.
+
 ## Como usar no celular
 
 1. Abra o app no navegador do celular.
