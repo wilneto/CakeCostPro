@@ -88,6 +88,9 @@ User=${APP_USER}
 Group=${APP_USER}
 WorkingDirectory=${APP_DIR}
 EnvironmentFile=/etc/cakecost-pro.env
+Environment=NODE_ENV=production
+Environment=HOST=0.0.0.0
+Environment=PORT=80
 ExecStart=/usr/bin/node ${APP_DIR}/server/index.mjs
 Restart=always
 RestartSec=5

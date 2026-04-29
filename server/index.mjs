@@ -23,8 +23,8 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.join(projectRoot, 'dist');
 
-const PORT = Number(process.env.PORT || 8787);
-const HOST = process.env.HOST || '127.0.0.1';
+const PORT = Number(process.env.PORT || (process.env.NODE_ENV === 'production' ? 80 : 8787));
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 
 const CONTENT_TYPES = {
   '.html': 'text/html; charset=utf-8',

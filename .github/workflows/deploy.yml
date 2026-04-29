@@ -48,14 +48,8 @@ jobs:
 
       - name: Prepare server env file
         run: |
-          cat > cakecost-pro.env <<EOF
-          NODE_ENV=production
-          HOST=0.0.0.0
-          PORT=80
-          DB_NAME=${DB_NAME}
-          DB_USER=${DB_USER}
-          DB_PASSWORD=${DB_PASSWORD}
-          EOF
+          printf 'NODE_ENV=production\nHOST=0.0.0.0\nPORT=80\nDB_NAME=%s\nDB_USER=%s\nDB_PASSWORD=%s\n' \
+            "$DB_NAME" "$DB_USER" "$DB_PASSWORD" > cakecost-pro.env
 
       - name: Sync application files
         run: |
