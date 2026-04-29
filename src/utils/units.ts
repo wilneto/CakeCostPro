@@ -104,6 +104,17 @@ export function formatBRL(value: number): string {
   }).format(Number.isFinite(value) ? value : 0);
 }
 
+export function formatDecimalBR(
+  value: number,
+  maximumFractionDigits = 2,
+  minimumFractionDigits = 0
+): string {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(Number.isFinite(value) ? value : 0);
+}
+
 export function formatNumberBR(value: number, maximumFractionDigits = 2): string {
   return new Intl.NumberFormat('pt-BR', {
     minimumFractionDigits: 0,
@@ -120,8 +131,41 @@ export function parsePtNumber(value: string | number | null | undefined): number
     return 0;
   }
 
-  const normalized = value.toString().trim().replace(/\./g, '').replace(',', '.');
-  const parsed = Number(normalized);
+  const cleaned = value
+    .toString()
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[^0-9,.-]/g, '');
+
+  if (!cleaned) {
+    return 0;
+  }
+
+  const negative = cleaned.startsWith('-') ? '-' : '';
+  const unsigned = cleaned.replace(/-/g, '');
+  const commaCount = (unsigned.match(/,/g) || []).length;
+  const dotCount = (unsigned.match(/\./g) || []).length;
+
+  let normalized = unsigned;
+  if (commaCount && dotCount) {
+    const decimalSeparatorIndex = Math.max(unsigned.lastIndexOf(','), unsigned.lastIndexOf('.'));
+    const integerPart = unsigned.slice(0, decimalSeparatorIndex).replace(/[.,]/g, '');
+    const fractionalPart = unsigned.slice(decimalSeparatorIndex + 1).replace(/[.,]/g, '');
+    normalized = fractionalPart ? `${integerPart}.${fractionalPart}` : integerPart;
+  } else if (commaCount) {
+    if (commaCount > 1) {
+      const lastCommaIndex = unsigned.lastIndexOf(',');
+      const integerPart = unsigned.slice(0, lastCommaIndex).replace(/,/g, '');
+      const fractionalPart = unsigned.slice(lastCommaIndex + 1).replace(/,/g, '');
+      normalized = fractionalPart ? `${integerPart}.${fractionalPart}` : integerPart;
+    } else {
+      normalized = unsigned.replace(',', '.');
+    }
+  } else if (dotCount > 1) {
+    normalized = unsigned.replace(/\./g, '');
+  }
+
+  const parsed = Number(`${negative}${normalized}`);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 

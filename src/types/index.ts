@@ -76,6 +76,7 @@ export interface Configuracoes {
   custoEnergiaPorHora: number;
   percentualPerdas: number;
   percentualMargemPadrao: number;
+  percentualMarkupPadrao?: number;
   custoPadraoEmbalagem: number;
   taxaExtraOpcional: number;
   arredondamentoComercial: number;
@@ -135,6 +136,7 @@ export const DEFAULT_CONFIGURACOES: Configuracoes = {
   custoEnergiaPorHora: 3.5,
   percentualPerdas: 5,
   percentualMargemPadrao: 40,
+  percentualMarkupPadrao: 40,
   custoPadraoEmbalagem: 2.5,
   taxaExtraOpcional: 0,
   arredondamentoComercial: 0.5,

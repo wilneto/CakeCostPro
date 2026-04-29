@@ -298,12 +298,13 @@ export function calcularCustoTotalReceita(
     custoExtras;
   const custoPorFatia = calcularCustoPorFatia(custoTotal, receita.quantidadeFatias);
   const margem = receita.margemDesejada ?? configuracoes.percentualMargemPadrao;
+  const markup = configuracoes.percentualMarkupPadrao ?? margem;
   const taxaExtra = receita.taxaExtraOpcional ?? configuracoes.taxaExtraOpcional;
   const arredondamento = receita.arredondamentoComercial ?? configuracoes.arredondamentoComercial;
   const precoVendaPorMargem = calcularPrecoVendaPorMargem(custoTotal, margem, taxaExtra, arredondamento);
   const precoVendaPorMarkup = calcularPrecoVendaPorMarkup(
     custoTotal,
-    margem,
+    markup,
     taxaExtra,
     arredondamento
   );

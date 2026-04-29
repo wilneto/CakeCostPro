@@ -11,6 +11,7 @@ export function ConfiguracoesPage({ navigate }: { navigate: (path: string) => vo
     custoEnergiaPorHora: String(configuracoes.custoEnergiaPorHora),
     percentualPerdas: String(configuracoes.percentualPerdas),
     percentualMargemPadrao: String(configuracoes.percentualMargemPadrao),
+    percentualMarkupPadrao: String(configuracoes.percentualMarkupPadrao ?? configuracoes.percentualMargemPadrao),
     custoPadraoEmbalagem: String(configuracoes.custoPadraoEmbalagem),
     taxaExtraOpcional: String(configuracoes.taxaExtraOpcional),
     arredondamentoComercial: String(configuracoes.arredondamentoComercial),
@@ -35,6 +36,7 @@ export function ConfiguracoesPage({ navigate }: { navigate: (path: string) => vo
             custoEnergiaPorHora: parsePtNumber(form.custoEnergiaPorHora),
             percentualPerdas: parsePtNumber(form.percentualPerdas),
             percentualMargemPadrao: parsePtNumber(form.percentualMargemPadrao),
+            percentualMarkupPadrao: parsePtNumber(form.percentualMarkupPadrao),
             custoPadraoEmbalagem: parsePtNumber(form.custoPadraoEmbalagem),
             taxaExtraOpcional: parsePtNumber(form.taxaExtraOpcional),
             arredondamentoComercial: parsePtNumber(form.arredondamentoComercial),
@@ -55,8 +57,16 @@ export function ConfiguracoesPage({ navigate }: { navigate: (path: string) => vo
 
         <div className="two-col">
           <TextField label="Margem padrão" inputMode="decimal" value={form.percentualMargemPadrao} onChange={(e) => setForm((prev) => ({ ...prev, percentualMargemPadrao: e.target.value }))} />
-          <TextField label="Embalagem padrão" inputMode="decimal" value={form.custoPadraoEmbalagem} onChange={(e) => setForm((prev) => ({ ...prev, custoPadraoEmbalagem: e.target.value }))} />
+          <TextField
+            label="Markup padrão"
+            inputMode="decimal"
+            value={form.percentualMarkupPadrao}
+            onChange={(e) => setForm((prev) => ({ ...prev, percentualMarkupPadrao: e.target.value }))}
+            hint="Usado quando o modo padrão de preço for markup."
+          />
         </div>
+
+        <TextField label="Embalagem padrão" inputMode="decimal" value={form.custoPadraoEmbalagem} onChange={(e) => setForm((prev) => ({ ...prev, custoPadraoEmbalagem: e.target.value }))} />
 
         <div className="two-col">
           <TextField label="Taxa extra opcional" inputMode="decimal" value={form.taxaExtraOpcional} onChange={(e) => setForm((prev) => ({ ...prev, taxaExtraOpcional: e.target.value }))} />

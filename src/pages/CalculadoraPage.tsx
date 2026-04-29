@@ -11,7 +11,7 @@ export function CalculadoraPage({ navigate }: { navigate: (path: string) => void
   const [custoManual, setCustoManual] = useState('');
   const [fatiasManual, setFatiasManual] = useState('10');
   const [margem, setMargem] = useState(String(configuracoes.percentualMargemPadrao));
-  const [markup, setMarkup] = useState(String(configuracoes.percentualMargemPadrao));
+  const [markup, setMarkup] = useState(String(configuracoes.percentualMarkupPadrao ?? configuracoes.percentualMargemPadrao));
   const [taxaExtra, setTaxaExtra] = useState(String(configuracoes.taxaExtraOpcional));
 
   const resultado = useMemo(() => {

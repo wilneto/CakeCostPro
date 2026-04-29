@@ -861,4 +861,21 @@ a {
   .mini-metric strong {
     font-size: 0.95rem;
   }
+
+  .list-card {
+    flex-direction: column;
+  }
+
+  .list-card__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .list-card__actions .btn {
+    flex: 1 1 0;
+  }
+
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
 }

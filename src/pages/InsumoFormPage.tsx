@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppData } from '@/hooks/useAppData';
 import type { BaseUnit, Insumo } from '@/types';
 import { gerarId } from '@/utils/ids';
-import { parsePtNumber } from '@/utils/units';
+import { formatDecimalBR, parsePtNumber } from '@/utils/units';
 import { Button, Card, Notice, SectionTitle, SelectField, TextAreaField, TextField } from '@/components/ui';
 
 const baseUnitOptions: BaseUnit[] = ['g', 'ml', 'unidade'];
@@ -29,6 +29,22 @@ function emptyState(): FormState {
     unidadeBaseCalculada: 'g',
     observacoes: '',
   };
+}
+
+function formatEditableNumber(value?: number, maximumFractionDigits = 2, minimumFractionDigits = 0): string {
+  if (value === undefined || value === null || !Number.isFinite(value)) {
+    return '';
+  }
+
+  return formatDecimalBR(value, maximumFractionDigits, minimumFractionDigits);
+}
+
+function normalizeEditableNumber(value: string, maximumFractionDigits = 2, minimumFractionDigits = 0): string {
+  if (!value.trim()) {
+    return '';
+  }
+
+  return formatDecimalBR(parsePtNumber(value), maximumFractionDigits, minimumFractionDigits);
 }
 
 function toInsumo(form: FormState, current?: Insumo): Insumo {
@@ -66,10 +82,10 @@ export function InsumoFormPage({
       setForm({
         nome: current.nome,
         categoria: current.categoria,
-        quantidadeComprada: String(current.quantidadeComprada ?? ''),
+        quantidadeComprada: formatEditableNumber(current.quantidadeComprada, 2, 0),
         unidadeCompra: current.unidadeCompra,
-        precoPago: String(current.precoPago ?? ''),
-        rendimentoBase: current.rendimentoBase ? String(current.rendimentoBase) : '',
+        precoPago: formatEditableNumber(current.precoPago, 2, 2),
+        rendimentoBase: formatEditableNumber(current.rendimentoBase, 2, 0),
         unidadeBaseCalculada: current.unidadeBaseCalculada ?? 'g',
         observacoes: current.observacoes ?? '',
       });
@@ -119,6 +135,9 @@ export function InsumoFormPage({
             inputMode="decimal"
             value={form.quantidadeComprada}
             onChange={(e) => setForm((prev) => ({ ...prev, quantidadeComprada: e.target.value }))}
+            onBlur={(e) =>
+              setForm((prev) => ({ ...prev, quantidadeComprada: normalizeEditableNumber(e.target.value, 2, 0) }))
+            }
             placeholder="1"
           />
           <SelectField
@@ -143,13 +162,20 @@ export function InsumoFormPage({
             inputMode="decimal"
             value={form.precoPago}
             onChange={(e) => setForm((prev) => ({ ...prev, precoPago: e.target.value }))}
+            onBlur={(e) =>
+              setForm((prev) => ({ ...prev, precoPago: normalizeEditableNumber(e.target.value, 2, 2) }))
+            }
             placeholder="5,00"
+            hint="Aceita vírgula decimal, como 12,50."
           />
           <TextField
             label="Rendimento base"
             inputMode="decimal"
             value={form.rendimentoBase}
             onChange={(e) => setForm((prev) => ({ ...prev, rendimentoBase: e.target.value }))}
+            onBlur={(e) =>
+              setForm((prev) => ({ ...prev, rendimentoBase: normalizeEditableNumber(e.target.value, 2, 0) }))
+            }
             placeholder="Ex.: 500"
           />
         </div>

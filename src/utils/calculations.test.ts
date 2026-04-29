@@ -12,6 +12,7 @@ import {
   calcularCustoPorFatia,
   converterMedidaParaBase,
 } from '@/utils/calculations';
+import { parsePtNumber } from '@/utils/units';
 
 const sugar: Insumo = {
   id: 'a1',
@@ -108,5 +109,38 @@ describe('calculos', () => {
     expect(resultado.custoMaoDeObra).toBeCloseTo(14, 6);
     expect(resultado.custoForno).toBeCloseTo(4, 6);
     expect(resultado.custoTotal).toBeCloseTo(20.525, 6);
+  });
+
+  it('aceita numeros no formato pt-BR com moeda e separadores', () => {
+    expect(parsePtNumber('R$ 1.234,56')).toBeCloseTo(1234.56, 6);
+    expect(parsePtNumber('12,5')).toBeCloseTo(12.5, 6);
+    expect(parsePtNumber('1.234.567')).toBe(1234567);
+  });
+
+  it('usa o percentual de markup padrao quando o modo de preco e markup', () => {
+    const resultado = calcularCustoTotalReceita(
+      {
+        ...receita,
+        ingredientes: [
+          { id: 'i1', insumoId: 'a1', quantidade: 0.5, unidade: 'xicara' },
+        ],
+      },
+      [sugar],
+      {
+        valorHoraMaoDeObra: 28,
+        custoGásPorHora: 6,
+        custoEnergiaPorHora: 3,
+        percentualPerdas: 5,
+        percentualMargemPadrao: 40,
+        percentualMarkupPadrao: 25,
+        custoPadraoEmbalagem: 2,
+        taxaExtraOpcional: 0,
+        arredondamentoComercial: 0,
+        modoPrecoPadrao: 'markup',
+      }
+    );
+
+    expect(resultado.precoVendaPorMarkup).toBeCloseTo(resultado.custoTotal * 1.25, 6);
+    expect(resultado.precoSugerido).toBeCloseTo(resultado.precoVendaPorMarkup, 6);
   });
 });
