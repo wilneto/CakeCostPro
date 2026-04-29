@@ -241,7 +241,7 @@ export function ReceitaFormPage({
             title="Ingredientes"
             subtitle="Cada item calcula o custo individual com base no insumo selecionado."
             action={
-              <Button variant="secondary" onClick={() => setIngredients((prev) => [...prev, emptyIngredient(insumos[0]?.id)])}>
+              <Button variant="secondary" onClick={() => setIngredients((prev) => [emptyIngredient(insumos[0]?.id), ...prev])}>
                 Adicionar ingrediente
               </Button>
             }

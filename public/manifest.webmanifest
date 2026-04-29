@@ -4,6 +4,7 @@
   "description": "Calculadora mobile-first para custo de bolos, doces e derivados.",
   "start_url": "/",
   "scope": "/",
+  "display_override": ["fullscreen", "standalone"],
   "display": "standalone",
   "background_color": "#f7f1ea",
   "theme_color": "#3b2418",

@@ -113,7 +113,7 @@ export function ReceitaDetailPage({
       </Card>
 
       <Card>
-        <SectionTitle title="Preço sugerido" subtitle="O preço final pode seguir margem sobre venda ou markup sobre custo." />
+        <SectionTitle title="Preço sugerido" subtitle="O preço final pode seguir margem sobre custo ou markup sobre custo." />
         <div className="detail-grid">
           <span>Preço por margem</span>
           <strong>{formatBRL(resultado.precoVendaPorMargem)}</strong>

@@ -245,11 +245,7 @@ export function calcularPrecoVendaPorMargem(
 ): number {
   const margem = Math.max(0, margemPercentual);
   const custoBase = custoTotal * (1 + Math.max(0, taxaExtraOpcional) / 100);
-  if (margem >= 100) {
-    return roundToStep(custoBase, arredondamentoComercial);
-  }
-
-  const preco = custoBase / (1 - margem / 100);
+  const preco = custoBase * (1 + margem / 100);
   return roundToStep(preco, arredondamentoComercial);
 }
 

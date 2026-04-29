@@ -74,7 +74,7 @@ export function ConfiguracoesPage({ navigate }: { navigate: (path: string) => vo
         </div>
 
         <SelectField label="Modo padrão de preço" value={form.modoPrecoPadrao} onChange={(e) => setForm((prev) => ({ ...prev, modoPrecoPadrao: e.target.value as 'margem' | 'markup' }))}>
-          <option value="margem">margem sobre venda</option>
+          <option value="margem">margem sobre custo</option>
           <option value="markup">markup sobre custo</option>
         </SelectField>
 

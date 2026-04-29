@@ -75,8 +75,8 @@ describe('calculos', () => {
   });
 
   it('calcula preco por margem e markup', () => {
-    expect(calcularPrecoVendaPorMargem(30, 40)).toBeCloseTo(50, 6);
-    expect(calcularPrecoVendaPorMarkup(30, 40)).toBeCloseTo(42, 6);
+    expect(calcularPrecoVendaPorMargem(30, 40)).toBeCloseTo(42, 6);
+    expect(calcularPrecoVendaPorMarkup(30, 25)).toBeCloseTo(37.5, 6);
   });
 
   it('calcula custo por fatia', () => {

@@ -36,7 +36,7 @@ export function CalculadoraPage({ navigate }: { navigate: (path: string) => void
     <Card>
       <SectionTitle
         title="Calculadora de preço"
-        subtitle="Compare margem sobre venda e markup sobre custo com o custo total da receita ou um valor manual."
+        subtitle="Compare margem sobre custo e markup sobre custo com o custo total da receita ou um valor manual."
       />
 
       <div className="toggle-row">
@@ -93,12 +93,12 @@ export function CalculadoraPage({ navigate }: { navigate: (path: string) => void
       <Card className="panel panel-soft">
         <SectionTitle title="Entendendo a diferença" />
         <p className="copy-block">
-          Margem sobre venda calcula o preço com base no que sobra depois de descontar o lucro desejado. Markup sobre
-          custo soma um percentual fixo em cima do custo.
+          Margem sobre custo adiciona o percentual desejado em cima do custo total. Markup sobre custo soma um
+          percentual fixo em cima do custo.
         </p>
         <p className="copy-block">
-          Exemplo: custo de R$ 30,00 com margem de 40% resulta em R$ 50,00. O mesmo custo com markup de 40% resulta
-          em R$ 42,00.
+          Exemplo: custo de R$ 30,00 com margem de 40% resulta em R$ 42,00. O mesmo custo com markup de 25% resulta
+          em R$ 37,50.
         </p>
       </Card>
 
