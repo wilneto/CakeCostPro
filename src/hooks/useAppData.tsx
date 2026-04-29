@@ -4,6 +4,7 @@ import type { AppState, Configuracoes, ConversaoInsumo, Insumo, Receita } from '
 import { DEFAULT_CONFIGURACOES } from '@/types';
 import { clearAppState, loadAppState, saveAppState } from '@/storage/appStorage';
 import { gerarId } from '@/utils/ids';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AppDataContextValue {
   state: AppState;
@@ -119,13 +120,22 @@ function reducer(state: AppState, action: Action): AppState {
 const AppDataContext = createContext<AppDataContextValue | null>(null);
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    loadAppState()
+    if (!user) {
+      dispatch({ type: 'replace', state: initialState });
+      setIsHydrated(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    loadAppState(user.id)
       .then((loadedState) => {
         if (!cancelled) {
           dispatch({ type: 'replace', state: loadedState ?? initialState });
@@ -145,15 +155,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !user) {
       return;
     }
 
-    void saveAppState(state);
-  }, [isHydrated, state]);
+    void saveAppState(state, user.id);
+  }, [isHydrated, state, user]);
 
   const value = useMemo<AppDataContextValue>(() => {
     return {
@@ -188,10 +198,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       },
       clearAll() {
         dispatch({ type: 'clear' });
-        void clearAppState();
+        if (user) {
+          void clearAppState(user.id);
+        }
       },
     };
-  }, [isHydrated, state]);
+  }, [isHydrated, state, user]);
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }

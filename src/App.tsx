@@ -12,6 +12,8 @@ import { ReceitaDetailPage } from '@/pages/ReceitaDetailPage';
 import { CalculadoraPage } from '@/pages/CalculadoraPage';
 import { ConfiguracoesPage } from '@/pages/ConfiguracoesPage';
 import { BackupPage } from '@/pages/BackupPage';
+import { AuthPage } from '@/pages/AuthPage';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 
 function ScreenError({ error }: { error: Error }) {
   return (
@@ -47,9 +49,10 @@ class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, { 
   }
 }
 
-function AppContent() {
+function AppContent({ onLogout }: { onLogout: () => Promise<void> }) {
   const { route, navigate, section } = useHashRoute();
   const { receitas, insumos, isHydrated } = useAppData();
+  const { user } = useAuth();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -78,12 +81,19 @@ function AppContent() {
           <Icon name="cake" className="icon" />
           <div>
             <strong>CakeCost Pro</strong>
-            <span>mobile-first · offline · BRL</span>
+            <span>{user?.email} · mobile-first · offline · BRL</span>
           </div>
         </div>
         <div className="app-topbar__status">
           <span className={`status-dot status-dot--${section}`} />
-          <span>{receitas.length} receitas · {insumos.length} insumos</span>
+          <div className="app-topbar__status-text">
+            <span>
+              {receitas.length} receitas · {insumos.length} insumos
+            </span>
+            <Button variant="ghost" className="topbar-logout" onClick={onLogout}>
+              Sair
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -102,8 +112,8 @@ function AppContent() {
 
       <Card className="footer-note">
         <p>
-          Dados salvos localmente no dispositivo via IndexedDB, com importação automática de dados antigos se
-          necessário.
+          Dados salvos por conta no navegador e no servidor, com sincronização por usuário e importação automática de
+          dados antigos se necessário.
         </p>
       </Card>
     </AppShell>
@@ -113,9 +123,35 @@ function AppContent() {
 export default function App() {
   return (
     <AppErrorBoundary>
-      <AppDataProvider>
-        <AppContent />
-      </AppDataProvider>
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
     </AppErrorBoundary>
+  );
+}
+
+function AuthGate() {
+  const auth = useAuth();
+
+  if (!auth.isReady || auth.isLoading) {
+    return (
+      <div className="error-screen">
+        <Card>
+          <Notice tone="info">Verificando sua sessão...</Notice>
+          <h2>CakeCost Pro</h2>
+          <p>Aguarde enquanto conferimos seu acesso e carregamos o espaço certo.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!auth.user) {
+    return <AuthPage onLogin={auth.login} onRegister={auth.register} />;
+  }
+
+  return (
+    <AppDataProvider>
+      <AppContent onLogout={auth.logout} />
+    </AppDataProvider>
   );
 }

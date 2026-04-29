@@ -3,14 +3,15 @@ import type { AppState, BackupPayload } from '@/types';
 const DB_NAME = 'cakecost-pro-db';
 const DB_VERSION = 1;
 const STORE_NAME = 'app-state';
-const STORAGE_KEY = 'cakecost-pro-state-v1';
-const RECORD_KEY = 'state';
+const STORAGE_KEY_PREFIX = 'cakecost-pro-state-v2';
+const LEGACY_STORAGE_KEY = 'cakecost-pro-state-v1';
+const RECORD_KEY_PREFIX = 'state:';
 const REMOTE_ENDPOINT = '/api/state';
 
 export interface StorageAdapter {
-  load(): Promise<AppState | null>;
-  save(state: AppState): Promise<void>;
-  clear(): Promise<void>;
+  load(scopeKey: string): Promise<AppState | null>;
+  save(state: AppState, scopeKey: string): Promise<void>;
+  clear(scopeKey: string): Promise<void>;
 }
 
 function parseTimestamp(value?: string | null): number {
@@ -20,6 +21,14 @@ function parseTimestamp(value?: string | null): number {
 
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function storageKey(scopeKey: string): string {
+  return `${STORAGE_KEY_PREFIX}:${scopeKey}`;
+}
+
+function recordKey(scopeKey: string): string {
+  return `${RECORD_KEY_PREFIX}${scopeKey}`;
 }
 
 function isBrowser(): boolean {
@@ -51,7 +60,7 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function getFromIndexedDb(): Promise<AppState | null> {
+async function getFromIndexedDb(scopeKey: string): Promise<AppState | null> {
   if (!supportsIndexedDb()) {
     return null;
   }
@@ -61,7 +70,7 @@ async function getFromIndexedDb(): Promise<AppState | null> {
     return await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const store = tx.objectStore(STORE_NAME);
-      const request = store.get(RECORD_KEY);
+      const request = store.get(recordKey(scopeKey));
 
       request.onsuccess = () => {
         const value = request.result as AppState | undefined;
@@ -74,7 +83,7 @@ async function getFromIndexedDb(): Promise<AppState | null> {
   }
 }
 
-async function setInIndexedDb(state: AppState): Promise<void> {
+async function setInIndexedDb(state: AppState, scopeKey: string): Promise<void> {
   if (!supportsIndexedDb()) {
     throw new Error('IndexedDB indisponível.');
   }
@@ -84,7 +93,7 @@ async function setInIndexedDb(state: AppState): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const request = store.put(state, RECORD_KEY);
+      const request = store.put(state, recordKey(scopeKey));
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error ?? new Error('Falha ao salvar no IndexedDB.'));
@@ -95,7 +104,7 @@ async function setInIndexedDb(state: AppState): Promise<void> {
   }
 }
 
-async function clearIndexedDb(): Promise<void> {
+async function clearIndexedDb(scopeKey: string): Promise<void> {
   if (!supportsIndexedDb()) {
     return;
   }
@@ -105,7 +114,7 @@ async function clearIndexedDb(): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      const request = store.delete(RECORD_KEY);
+      const request = store.delete(recordKey(scopeKey));
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error ?? new Error('Falha ao limpar IndexedDB.'));
@@ -116,12 +125,12 @@ async function clearIndexedDb(): Promise<void> {
   }
 }
 
-function getFromLocalStorage(): AppState | null {
+function getFromLocalStorage(scopeKey: string): AppState | null {
   if (!isBrowser()) {
     return null;
   }
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = window.localStorage.getItem(storageKey(scopeKey)) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
   if (!raw) {
     return null;
   }
@@ -133,20 +142,21 @@ function getFromLocalStorage(): AppState | null {
   }
 }
 
-function setInLocalStorage(state: AppState): void {
+function setInLocalStorage(state: AppState, scopeKey: string): void {
   if (!isBrowser()) {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.localStorage.setItem(storageKey(scopeKey), JSON.stringify(state));
 }
 
-function clearLocalStorage(): void {
+function clearLocalStorage(scopeKey: string): void {
   if (!isBrowser()) {
     return;
   }
 
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(storageKey(scopeKey));
+  window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 }
 
 async function getFromApi(): Promise<AppState | null> {
@@ -160,6 +170,7 @@ async function getFromApi(): Promise<AppState | null> {
       Accept: 'application/json',
     },
     cache: 'no-store',
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -182,6 +193,7 @@ async function setToApi(state: AppState): Promise<void> {
       Accept: 'application/json',
     },
     body: JSON.stringify({ state }),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -199,6 +211,7 @@ async function clearApi(): Promise<void> {
     headers: {
       Accept: 'application/json',
     },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -223,10 +236,10 @@ function pickLatestState(localState: AppState | null, remoteState: AppState | nu
 }
 
 export const appStorage: StorageAdapter = {
-  async load() {
+  async load(scopeKey) {
     const [indexedState, legacyState, remoteState] = await Promise.all([
-      getFromIndexedDb().catch(() => null),
-      Promise.resolve(getFromLocalStorage()),
+      getFromIndexedDb(scopeKey).catch(() => null),
+      Promise.resolve(getFromLocalStorage(scopeKey)),
       getFromApi().catch(() => null),
     ]);
 
@@ -235,7 +248,7 @@ export const appStorage: StorageAdapter = {
 
     if (latest) {
       if (latest !== indexedState) {
-        await setInIndexedDb(latest).catch(() => {
+        await setInIndexedDb(latest, scopeKey).catch(() => {
           // Mantém o app funcionando mesmo se o IndexedDB falhar.
         });
       }
@@ -249,39 +262,39 @@ export const appStorage: StorageAdapter = {
 
     return latest;
   },
-  async save(state) {
-    await setInIndexedDb(state).catch(() => {
-      setInLocalStorage(state);
+  async save(state, scopeKey) {
+    await setInIndexedDb(state, scopeKey).catch(() => {
+      setInLocalStorage(state, scopeKey);
     });
 
     try {
       await setToApi(state);
-      clearLocalStorage();
+      clearLocalStorage(scopeKey);
     } catch {
-      setInLocalStorage(state);
+      setInLocalStorage(state, scopeKey);
     }
   },
-  async clear() {
-    await clearIndexedDb().catch(() => {
+  async clear(scopeKey) {
+    await clearIndexedDb(scopeKey).catch(() => {
       // Sem quebra: se IndexedDB falhar, limpamos o fallback legado.
     });
-    clearLocalStorage();
+    clearLocalStorage(scopeKey);
     await clearApi().catch(() => {
       // Se o backend não responder, a limpeza local ainda é concluída.
     });
   },
 };
 
-export async function loadAppState(): Promise<AppState | null> {
-  return appStorage.load();
+export async function loadAppState(scopeKey: string): Promise<AppState | null> {
+  return appStorage.load(scopeKey);
 }
 
-export async function saveAppState(state: AppState): Promise<void> {
-  await appStorage.save(state);
+export async function saveAppState(state: AppState, scopeKey: string): Promise<void> {
+  await appStorage.save(state, scopeKey);
 }
 
-export async function clearAppState(): Promise<void> {
-  await appStorage.clear();
+export async function clearAppState(scopeKey: string): Promise<void> {
+  await appStorage.clear(scopeKey);
 }
 
 export function exportBackup(state: AppState): BackupPayload {

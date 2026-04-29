@@ -122,6 +122,14 @@ a {
   font-size: 0.88rem;
 }
 
+.app-topbar__status-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .status-dot {
   width: 9px;
   height: 9px;
@@ -681,6 +689,53 @@ a {
   padding: 20px;
 }
 
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+}
+
+.auth-card {
+  width: min(100%, 520px);
+  display: grid;
+  gap: 18px;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-family: "Iowan Old Style", "Baskerville", Georgia, serif;
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+}
+
+.auth-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.58;
+}
+
+.auth-toggle {
+  margin-top: 4px;
+}
+
+.auth-note {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.topbar-logout {
+  min-height: 34px;
+  padding-inline: 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #f8efe5;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .copy-block {
   line-height: 1.6;
 }
@@ -760,6 +815,27 @@ a {
   .section-title {
     margin-bottom: 18px;
     padding-top: 1px;
+  }
+
+  .app-topbar {
+    padding: 12px 14px;
+  }
+
+  .app-topbar__status {
+    font-size: 0.8rem;
+  }
+
+  .topbar-logout {
+    min-height: 32px;
+    padding-inline: 10px;
+  }
+
+  .auth-screen {
+    padding: 16px;
+  }
+
+  .auth-card {
+    gap: 16px;
   }
 
   .stat-card {

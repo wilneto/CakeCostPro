@@ -51,6 +51,15 @@ npm start
 
 O servidor HTTP do backend também entrega os arquivos estáticos de `dist/` quando eles existem. Em produção, o ideal é publicar esse processo atrás de um domínio fixo.
 
+## Cadastro por e-mail
+
+O app agora exige autenticação por e-mail e senha.
+
+- cada conta recebe um espaço isolado
+- os dados de uma conta não aparecem em outra
+- a sessão é mantida por cookie no navegador
+- os dados antigos do modo anterior são reivindicados pela primeira conta que entrar no sistema no servidor atualizado
+
 ## Deploy em servidor com PostgreSQL
 
 Este projeto inclui um fluxo de deploy automático em [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) e um script de bootstrap em [`deploy/server-deploy.sh`](./deploy/server-deploy.sh).
